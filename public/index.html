@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TicketHub - Book Your Events</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/event-details.css">
+    
+    <!-- JavaScript Files -->
+    <script src="js/app.js" defer></script>
+    <script src="js/seats.js" defer></script>
+    <script src="js/eventDetails.js" defer></script>
+</head>
+<body>
+    <div id="app"></div>
+
+    <!-- Admin Sidebar (for admin users) -->
+    <aside class="admin-sidebar-global" id="adminSidebarGlobal" style="display: none;">
+        <div class="admin-brand">
+            <div class="brand-logo">🎟️</div>
+            <div class="brand-text">TicketHub Admin</div>
+        </div>
+        <nav class="admin-nav">
+            <button class="admin-nav-link" onclick="app.showAdminTab('stats')" data-admin-tab="stats">
+                <span>📈</span>
+                <span>Stats</span>
+            </button>
+            <button class="admin-nav-link" onclick="app.showAdminTab('events')" data-admin-tab="events">
+                <span>🎬</span>
+                <span>Events</span>
+            </button>
+            <button class="admin-nav-link" onclick="app.showAdminTab('halls')" data-admin-tab="halls">
+                <span>🏟️</span>
+                <span>Halls</span>
+            </button>
+            <button class="admin-nav-link" onclick="app.showAdminTab('bookings')" data-admin-tab="bookings">
+                <span>🧾</span>
+                <span>Bookings</span>
+            </button>
+        </nav>
+        <div class="admin-sidebar-footer">
+            <div class="admin-meta">
+                <span class="meta-title">Quick Tips</span>
+                <ul>
+                    <li>Use Demo Payment for testing</li>
+                    <li>Edit layout from seating page</li>
+                </ul>
+            </div>
+            <button class="app-nav-link danger" onclick="app.logout()" style="margin-top: 1rem;">Logout</button>
+        </div>
+    </aside>
+
+    <!-- App Shell with Left Sidebar -->
+    <div class="app-shell">
+        <aside class="app-sidebar">
+            <div class="app-brand">
+                <div class="brand-logo">🎟️</div>
+                <div class="brand-text">TicketHub</div>
+            </div>
+            <nav class="app-nav">
+                <button class="app-nav-link" onclick="app.showPage('home')" data-page="home">
+                    <span>🏠</span>
+                    <span>Home</span>
+                </button>
+                <button class="app-nav-link" onclick="app.showPage('events')" data-page="events">
+                    <span>🎬</span>
+                    <span>Events</span>
+                </button>
+                <button class="app-nav-link" onclick="app.showPage('bookings')" id="bookingsNav">
+                    <span>🧾</span>
+                    <span>My Bookings</span>
+                    <span class="nav-badge" id="bookingsStatusBadge">0</span>
+                </button>
+                <button class="app-nav-link" onclick="app.showPage('admin')" id="adminNav" style="display:none;">
+                    <span>🛠️</span>
+                    <span>Admin</span>
+                </button>
+            </nav>
+            <div class="app-sidebar-footer">
+                <button class="app-nav-link danger" onclick="app.logout()" id="logoutBtn" style="display:none;">Logout</button>
+                <button class="app-nav-link primary" onclick="app.showPage('login')" id="loginBtn">Login</button>
+            </div>
+        </aside>
+        <main class="app-main">
+
+    <!-- Home Page -->
+    <div id="homePage" class="page active">
+        <div class="hero">
+            <div class="hero-content">
+                <h1 class="hero-title">Discover Amazing Events Near You</h1>
+                <p class="hero-subtitle">From concerts to conferences, find and book tickets for the best events happening around you. Quick, easy, and secure booking experience.</p>
+                <div class="hero-buttons">
+                    <button onclick="app.showPage('events')" class="btn btn-primary btn-lg">Explore Events</button>
+                    <button onclick="app.showPage('bookings')" class="btn btn-secondary btn-lg" style="margin-left: 1rem;">My Bookings</button>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="hero-image-placeholder">
+                    <div class="hero-icon">🎭</div>
+                    <p>Live Events</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🎫</div>
+                <h3>Easy Booking</h3>
+                <p>Book your tickets in seconds</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎬</div>
+                <h3>Wide Selection</h3>
+                <p>Choose from thousands of events</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Real-time Updates</h3>
+                <p>Instant seat availability updates</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Secure Payments</h3>
+                <p>Safe and secure transactions</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Page -->
+    <div id="loginPage" class="page">
+        <div class="auth-container">
+            <div class="auth-box">
+                <h2>Login to TicketHub</h2>
+                <form onsubmit="app.handleLogin(event)">
+                    <input type="email" id="loginEmail" placeholder="Email" required>
+                    <input type="password" id="loginPassword" placeholder="Password" required>
+                    <button type="submit" class="btn btn-primary btn-block">Login</button>
+                </form>
+                <p>Don't have an account? <a href="#" onclick="app.showPage('register')">Register here</a></p>
+                <div class="demo-creds">
+                    <p><strong>Demo Admin:</strong> admin@tickethub.com / admin123</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Page -->
+    <div id="registerPage" class="page">
+        <div class="auth-container">
+            <div class="auth-box">
+                <h2>Create Account</h2>
+                <form onsubmit="app.handleRegister(event)">
+                    <input type="text" id="regName" placeholder="Full Name" required>
+                    <input type="email" id="regEmail" placeholder="Email" required>
+                    <input type="password" id="regPassword" placeholder="Password" required>
+                    <input type="password" id="regConfirm" placeholder="Confirm Password" required>
+                    <button type="submit" class="btn btn-primary btn-block">Register</button>
+                </form>
+                <p>Already have an account? <a href="#" onclick="app.showPage('login')">Login here</a></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Events Page -->
+    <div id="eventsPage" class="page">
+        <div class="events-container">
+            <h2>Upcoming Events</h2>
+            <div class="filters">
+                <input type="text" id="searchEvents" placeholder="Search events..." onkeyup="app.filterEvents()">
+                <select id="cityFilter" onchange="app.filterEvents()">
+                    <option value="">All Cities</option>
+                    <option value="Delhi">Delhi</option>
+                    <option value="Mumbai">Mumbai</option>
+                    <option value="Bangalore">Bangalore</option>
+                </select>
+            </div>
+            <div class="events-grid" id="eventsGrid">
+                <!-- Events will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Event Details Page -->
+    <div id="eventDetailsPage" class="page">
+        <div class="event-details-container">
+            <div class="event-header">
+                <button onclick="app.showPage('events')" class="btn btn-secondary">Back</button>
+            </div>
+            <div class="event-content">
+                <div class="event-image">
+                    <img id="eventImage" src="/placeholder.svg" alt="Event">
+                </div>
+                <div class="event-info">
+                    <h2 id="eventTitle"></h2>
+                    <p id="eventDescription"></p>
+                    <div class="event-details">
+                        <p><strong>Date:</strong> <span id="eventDate"></span></p>
+                        <p><strong>Time:</strong> <span id="eventTime"></span></p>
+                        <p><strong>Venue:</strong> <span id="eventVenue"></span></p>
+                        <p><strong>Price per Seat:</strong> ₹<span id="eventPrice"></span></p>
+                        <p><strong>Available Seats:</strong> <span id="availableSeats"></span></p>
+                    </div>
+                    <button onclick="app.loadSeats()" class="btn btn-primary btn-lg">Select Seats</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seating Page -->
+    <div id="seatingPage" class="page">
+        <div class="seating-container">
+            <div class="seating-header">
+                <button onclick="app.showPage('eventDetails')" class="btn btn-secondary">Back</button>
+                <h2>Select Your Seats</h2>
+                <div class="seat-legend">
+                    <span><span class="seat seat-available"></span> Available</span>
+                    <span><span class="seat seat-selected"></span> Selected</span>
+                    <span><span class="seat seat-booked"></span> Booked</span>
+                </div>
+            </div>
+
+            <div class="seating-content">
+                <div class="screen">SCREEN</div>
+                <div class="layout-editor" id="layoutEditor" style="display: none;">
+                    <div class="layout-controls">
+                        <h3>Edit Layout</h3>
+                        <div class="layout-inputs">
+                            <div class="input-group">
+                                <label for="rowsInput">Rows:</label>
+                                <input type="number" id="rowsInput" min="1" max="26" value="10">
+                            </div>
+                            <div class="input-group">
+                                <label for="seatsInput">Seats per Row:</label>
+                                <input type="number" id="seatsInput" min="1" max="20" value="10">
+                            </div>
+                            <button onclick="app.saveLayout()" class="btn btn-primary">Save Layout</button>
+                            <button onclick="app.cancelLayoutEdit()" class="btn btn-secondary">Cancel</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="seats-area" id="seatsArea">
+                    <!-- Seats will be rendered here -->
+                </div>
+                <div class="layout-actions" id="layoutActions" style="display: none;">
+                    <button onclick="app.editLayout()" class="btn btn-secondary">Edit Layout</button>
+                </div>
+            </div>
+
+            <div class="booking-summary">
+                <div class="summary-content">
+                    <h3>Booking Summary</h3>
+                    <div class="summary-row">
+                        <span>Selected Seats:</span>
+                        <span id="selectedSeatsCount">0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span>Price per Seat:</span>
+                        <span>₹<span id="pricePerSeat">0</span></span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total Amount:</span>
+                        <span>₹<span id="totalAmount">0</span></span>
+                    </div>
+                    <button onclick="app.proceedToPayment()" class="btn btn-primary btn-block">Proceed to Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Page -->
+    <div id="paymentPage" class="page">
+        <div class="payment-container">
+            <div class="payment-box">
+                <h2>Complete Your Payment</h2>
+                <div class="payment-summary">
+                    <div class="summary-row">
+                        <span>Seats:</span>
+                        <span id="paymentSeats"></span>
+                    </div>
+                    <div class="summary-row total">
+                        <span>Total:</span>
+                        <span>₹<span id="paymentTotal"></span></span>
+                    </div>
+                </div>
+                <form onsubmit="app.handlePayment(event)">
+                    <div class="payment-method-section">
+                        <label>Contact Details</label>
+                        <input type="text" id="contactName" placeholder="Full Name" required>
+                        <input type="email" id="contactEmail" placeholder="Email" required>
+                    </div>
+                    <div class="payment-method-section">
+                        <label>Payment Method</label>
+                        <select id="paymentMethod" required>
+                            <option value="all">All Payment Methods</option>
+                            <option value="upi">UPI</option>
+                            <option value="card">Credit/Debit Card</option>
+                            <option value="netbanking">Net Banking</option>
+                            <option value="wallet">Wallet</option>
+                            <option value="demo">Demo Payment (Test Only)</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Pay Now</button>
+                </form>
+                <p class="payment-note">Select "Demo Payment" for testing without Razorpay. For production, use Razorpay methods.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bookings Page -->
+    <div id="bookingsPage" class="page">
+        <div class="bookings-container">
+            <h2>My Bookings</h2>
+            <div class="bookings-list" id="bookingsList">
+                <!-- Bookings will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPage" class="page">
+        <div class="admin-shell">
+            <aside class="admin-sidebar">
+                <div class="admin-brand">
+                    <div class="brand-logo">🎟️</div>
+                    <div class="brand-text">TicketHub Admin</div>
+                </div>
+                <nav class="admin-nav">
+                    <button class="admin-nav-link active" onclick="app.switchAdminTab('stats')">
+                        <span>📈</span>
+                        <span>Stats</span>
+                    </button>
+                    <button class="admin-nav-link" onclick="app.switchAdminTab('events')">
+                        <span>🎬</span>
+                        <span>Events</span>
+                    </button>
+                    <button class="admin-nav-link" onclick="app.switchAdminTab('halls')">
+                        <span>🏟️</span>
+                        <span>Halls</span>
+                    </button>
+                    <button class="admin-nav-link" onclick="app.switchAdminTab('bookings')">
+                        <span>🧾</span>
+                        <span>Bookings</span>
+                    </button>
+                </nav>
+                <div class="admin-sidebar-footer">
+                    <div class="admin-meta">
+                        <span class="meta-title">Quick Tips</span>
+                        <ul>
+                            <li>Use Demo Payment for testing</li>
+                            <li>Edit layout from seating page</li>
+                        </ul>
+                    </div>
+                </div>
+            </aside>
+
+            <main class="admin-main">
+                <header class="admin-topbar">
+                    <h2>Dashboard</h2>
+                    <div class="admin-actions">
+                        <button class="btn btn-secondary" onclick="app.loadAdminData()">Refresh</button>
+                    </div>
+                </header>
+
+                <!-- Stats Tab -->
+                <section id="statsTab" class="admin-tab-content active">
+                    <!-- Main Stats Grid -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">🎬</div>
+                            <h3>Total Events</h3>
+                            <p class="stat-number" id="totalEventsCount">0</p>
+                            <p class="stat-label">Active events</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">🧾</div>
+                            <h3>Total Bookings</h3>
+                            <p class="stat-number" id="totalBookingsCount">0</p>
+                            <p class="stat-label">All time bookings</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">💰</div>
+                            <h3>Total Revenue</h3>
+                            <p class="stat-number">₹<span id="totalRevenueCount">0</span></p>
+                            <p class="stat-label">Confirmed bookings</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏳</div>
+                            <h3>Pending Bookings</h3>
+                            <p class="stat-number" id="pendingBookingsCount">0</p>
+                            <p class="stat-label">Awaiting approval</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📅</div>
+                            <h3>Upcoming Events</h3>
+                            <p class="stat-number" id="upcomingEventsCount">0</p>
+                            <p class="stat-label">Next 7 days</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">📊</div>
+                            <h3>Avg Booking Value</h3>
+                            <p class="stat-number">₹<span id="avgBookingValue">0</span></p>
+                            <p class="stat-label">Per booking</p>
+                        </div>
+                    </div>
+
+                    <!-- Dashboard Content Grid -->
+                    <div class="dashboard-grid">
+                        <!-- Recent Bookings Widget -->
+                        <div class="dashboard-widget">
+                            <div class="widget-header">
+                                <h3>📋 Recent Bookings</h3>
+                                <button onclick="app.switchAdminTab('bookings')" class="btn-link">View All</button>
+                            </div>
+                            <div class="widget-content">
+                                <div id="recentBookingsList" class="recent-list">
+                                    <p class="loading-text">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upcoming Events Widget -->
+                        <div class="dashboard-widget">
+                            <div class="widget-header">
+                                <h3>🎭 Upcoming Events</h3>
+                                <button onclick="app.switchAdminTab('events')" class="btn-link">View All</button>
+                            </div>
+                            <div class="widget-content">
+                                <div id="upcomingEventsList" class="recent-list">
+                                    <p class="loading-text">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions Widget -->
+                        <div class="dashboard-widget">
+                            <div class="widget-header">
+                                <h3>⚡ Quick Actions</h3>
+                            </div>
+                            <div class="widget-content">
+                                <div class="quick-actions">
+                                    <button onclick="app.showCreateEventForm(); app.switchAdminTab('events');" class="quick-action-btn">
+                                        <span class="action-icon">➕</span>
+                                        <span>Create Event</span>
+                                    </button>
+                                    <button onclick="app.showCreateHallForm(); app.switchAdminTab('halls');" class="quick-action-btn">
+                                        <span class="action-icon">🏟️</span>
+                                        <span>Add Hall</span>
+                                    </button>
+                                    <button onclick="app.switchAdminTab('bookings')" class="quick-action-btn">
+                                        <span class="action-icon">📊</span>
+                                        <span>View Bookings</span>
+                                    </button>
+                                    <button onclick="app.loadAdminData()" class="quick-action-btn">
+                                        <span class="action-icon">🔄</span>
+                                        <span>Refresh Data</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Popular Events Widget -->
+                        <div class="dashboard-widget">
+                            <div class="widget-header">
+                                <h3>🔥 Popular Events</h3>
+                            </div>
+                            <div class="widget-content">
+                                <div id="popularEventsList" class="recent-list">
+                                    <p class="loading-text">Loading...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Events Tab -->
+                <section id="eventsTab" class="admin-tab-content">
+                    <div class="admin-panel-header">
+                        <h3>Manage Events</h3>
+                        <div class="admin-add-btn">
+                            <button onclick="app.showCreateEventForm()" class="btn btn-primary">Add Event</button>
+                        </div>
+                    </div>
+                    <div id="eventFormContainer" style="display:none;" class="form-container">
+                        <form onsubmit="app.handleCreateEvent(event)">
+                            <h3>Create New Event</h3>
+                            <input type="text" id="eventTitleInput" placeholder="Event Title" required>
+                            <textarea id="eventDescInput" placeholder="Description" required></textarea>
+                            <input type="text" id="eventVenueInput" placeholder="Venue" required>
+                            <select id="hallSelectInput" required>
+                                <option value="">Select Hall</option>
+                            </select>
+                            <input type="date" id="eventDateInput" required>
+                            <input type="time" id="eventTimeInput" required>
+                            <input type="number" id="eventPriceInput" placeholder="Price" required>
+                            <input type="url" id="eventImageInput" placeholder="Image URL">
+                            <button type="submit" class="btn btn-primary">Create Event</button>
+                            <button type="button" onclick="app.hideCreateEventForm()" class="btn btn-secondary">Cancel</button>
+                        </form>
+                    </div>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Venue</th>
+                                <th>Date</th>
+                                <th>Price</th>
+                                <th>Booked/Total</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="eventsTableBody"></tbody>
+                    </table>
+                </section>
+
+                <!-- Halls Tab -->
+                <section id="hallsTab" class="admin-tab-content">
+                    <div class="admin-panel-header">
+                        <h3>Manage Halls</h3>
+                        <div class="admin-add-btn">
+                            <button onclick="app.showCreateHallForm()" class="btn btn-primary">Add Hall</button>
+                        </div>
+                    </div>
+                    <div id="hallFormContainer" style="display:none;" class="form-container">
+                        <form onsubmit="app.handleCreateHall(event)">
+                            <h3>Create New Hall</h3>
+                            <input type="text" id="hallNameInput" placeholder="Hall Name" required>
+                            <input type="text" id="hallCityInput" placeholder="City" required>
+                            <input type="number" id="hallRowsInput" placeholder="Number of Rows" required>
+                            <input type="number" id="hallSeatsInput" placeholder="Seats per Row" required>
+                            <button type="submit" class="btn btn-primary">Create Hall</button>
+                            <button type="button" onclick="app.hideCreateHallForm()" class="btn btn-secondary">Cancel</button>
+                        </form>
+                    </div>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>City</th>
+                                <th>Total Seats</th>
+                                <th>Rows x Seats</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="hallsTableBody"></tbody>
+                    </table>
+                </section>
+
+                <!-- Bookings Tab -->
+                <section id="bookingsTab" class="admin-tab-content">
+                    <div class="admin-panel-header">
+                        <h3>Manage Bookings</h3>
+                    </div>
+                    <table class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Event</th>
+                                <th>Seats</th>
+                                <th>Amount</th>
+                                <th>Payment Method</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bookingsTableBody"></tbody>
+                    </table>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+        </main>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
